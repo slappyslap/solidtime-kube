@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}-postgresql
+spec:
+  replicas: {{ .Values.db.replicasCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-postgresql
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: "{{ .Values.db.image.repository }}"
+        imagePullPolicy: {{ .Values.db.image.pullPolicy }}
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: {{ .Values.db.database }}
+        - name: POSTGRES_USER
+          value: {{ .Values.db.username }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgresql-secret
+              key: postgresql-password
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+          subPath: postgresql
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-postgresql-pvc
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}-postgresql
+spec:
+  ports:
+  - port: 5432
+  selector:
+    app: {{ .Release.Name }}-postgresql
+
+---
+# PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-postgresql-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.db.storage }}
+
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-postgresql-secret
+  namespace: {{ .Values.namespace }}
+type: Opaque
+data:
+  postgresql-password: {{ .Values.db.password | b64enc }}

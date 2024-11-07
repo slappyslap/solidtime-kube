@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-queue
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.queue.replicasCount }}
+  selector:
+    matchLabels:
+      app: solidtime-queue
+  template:
+    metadata:
+      labels:
+        app: solidtime-queue
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-queue
+          image: solidtime/solidtime:{{ .Chart.AppVersion }}
+          env:
+            - name: CONTAINER_MODE
+              value: "worker"
+            - name: WORKER_COMMAND
+              value: "php /var/www/html/artisan queue:work"
+            - name: DB_HOST
+              value: {{ .Release.Name }}-postgresql
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-env-secret
+          volumeMounts:
+            - name: app-storage
+              mountPath: /var/www/html/storage/app
+              subPath: app
+      volumes:
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-app-storage-pvc

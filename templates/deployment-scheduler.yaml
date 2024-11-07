@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-schedueler
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.schedueler.replicasCount }}
+  selector:
+    matchLabels:
+      app: solidtime-schedueler
+  template:
+    metadata:
+      labels:
+        app: solidtime-schedueler
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-schedueler
+          image: solidtime/solidtime:{{ .Chart.AppVersion }}
+          env:
+            - name: CONTAINER_MODE
+              value: "scheduler"
+            - name: DB_HOST
+              value: {{ .Release.Name }}-postgresql
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-env-secret
+          volumeMounts:
+            - name: app-storage
+              mountPath: /var/www/html/storage/app
+              subPath: app
+      volumes:
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-app-storage-pvc

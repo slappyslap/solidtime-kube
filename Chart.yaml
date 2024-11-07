@@ -1,0 +1,9 @@
+apiVersion: v2
+name: solidtime-kube
+description: A Helm chart deploying SolidTime (https://www.solidtime.io/) on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "0.3.1"
+maintainers:
+  - name: Maxime Badin (Slappyslap)
+    email: contact@maximebadin.fr

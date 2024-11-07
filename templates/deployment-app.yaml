@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  namespace: {{ .Values.namespace }}
+  label:
+    app: solidtime-app
+spec:
+  replicas: {{ .Values.app.replicasCount }}
+  selector:
+    matchLabels:
+      app: solidtime-app
+  template:
+    metadata:
+      labels:
+        app: solidtime-app
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-app
+          image: solidtime/solidtime:{{ .Chart.AppVersion }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: CONTAINER_MODE
+              value: "http"
+            - name: DB_HOST
+              value: {{ .Release.Name }}-postgresql
+            - name: AUTO_DB_MIGRATE
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-env-secret
+          readinessProbe:
+            httpGet:
+              path: /health-check/up
+              port: http
+          volumeMounts:
+            - name: app-storage
+              mountPath: /var/www/html/storage/app
+              subPath: app
+      volumes:
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-app-storage-pvc

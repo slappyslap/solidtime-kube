@@ -1,0 +1,56 @@
+namespace: solidtime
+
+env:
+  APP_ENV: production
+  APP_DEBUG: false
+  APP_URL: https://solidtime.local
+  APP_FORCE_HTTP: true
+  TRUSTED_PROXIES: "0.0.0.0/0"
+
+  APP_KEY:
+  PASSPORT_PRIVATE_KEY: |-
+
+  PASSPORT_PUBLIC_KEY: |-
+  SUPER_ADMIN: # Super admin emails separated by comma
+
+  LOG_CHANNEL: stderr_daily
+  LOG_LEVEL: debug
+
+  DB_PORT: 5432
+  DB_DATABASE: solidtime
+  DB_USERNAME: solidtime
+  DB_PASSWORD: solidtime
+
+  MAIL_HOST:
+  MAIL_PORT:
+  MAIL_USERNAME:
+  MAIL_PASSWORD:
+  MAIL_ENCRYPTION: tls
+  MAIL_FROM_ADDRESS:
+  MAIL_FROM_NAME: SolidTime
+
+app:
+  replicasCount: 1
+  storage: 5Gi
+  domain: # App domain
+
+queue:
+  replicasCount: 1
+
+schedueler:
+  replicasCount: 1
+
+db:
+  replicasCount: 1
+  storage: 1Gi
+  database: solidtime
+  username: solidtime
+  password: solidtime
+  port: 5432
+  image:
+    repository: postgres:13.3
+    pullPolicy: IfNotPresent
+
+ingress:
+  traefik:
+    enabled: true
