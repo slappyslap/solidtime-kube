@@ -1,5 +1,5 @@
-# solidtime-kube
-Deploy solidtime on kubernetes
+# Solidtime-kube
+Deploy [Solidtime](https://solidtime.io) on kubernetes
 
 ## Prerequisites
 - [A Kubernetes cluster](https://kubernetes.io/docs/setup/)
